@@ -19,6 +19,7 @@ export default function HomePage() {
 
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
   const [validationError, setValidationError] = useState<string | null>(null)
+  const timerRef = useRef<number | null>(null)
 
   const [isNavVisible, setIsNavVisible] = useState(true)
   const lastScrollY = useRef(0)
@@ -146,6 +147,7 @@ export default function HomePage() {
       })
 
       if (res.ok) {
+        setValidationError(null)
         setStatus('success')
         setContactForm({ name: '', email: '', phone: '', serviceType: '', message: '' })
       } else {
@@ -166,6 +168,36 @@ export default function HomePage() {
       [e.target.name]: e.target.value,
     })
   }
+
+  // Auto-hide success/error messages after a short delay
+  useEffect(() => {
+    // clear previous timer
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+
+    if (status === 'success') {
+      timerRef.current = window.setTimeout(() => {
+        setStatus('idle')
+        setValidationError(null)
+        timerRef.current = null
+      }, 6000)
+    } else if (status === 'error' || validationError) {
+      timerRef.current = window.setTimeout(() => {
+        setStatus('idle')
+        setValidationError(null)
+        timerRef.current = null
+      }, 8000)
+    }
+
+    return () => {
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current)
+        timerRef.current = null
+      }
+    }
+  }, [status, validationError])
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId)
@@ -408,16 +440,16 @@ export default function HomePage() {
                   size="lg"
                   className="w-full bg-yellow-400 text-slate-900 hover:bg-yellow-500 font-semibold"
                 >
-                  {status === 'sending' ? 'Enviando...' : 'Send Message'}
+                  {status === 'sending' ? 'Sending...' : 'Send Message'}
                 </Button>
                 {status === 'success' && (
-                  <p className="text-green-400 mt-2">Mensaje enviado. Gracias — nos pondremos en contacto pronto.</p>
+                  <p className="text-green-400 mt-2">Message sent. Thank you — we will get in touch with you soon.</p>
                 )}
                 {validationError && (
                   <p className="text-red-400 mt-2">{validationError}</p>
                 )}
                 {status === 'error' && !validationError && (
-                  <p className="text-red-400 mt-2">Error al enviar. Por favor intenta de nuevo más tarde.</p>
+                  <p className="text-red-400 mt-2">Error sending your message. Please try again later.</p>
                 )}
               </form>
             </div>
