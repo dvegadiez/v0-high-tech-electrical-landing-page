@@ -221,7 +221,7 @@ export default function HomePage() {
       >
         <div className="max-w-6xl mx-auto flex items-center justify-between leading-7">
           <div className="flex items-center gap-3">
-            <img src="/logo.jpeg" alt="High Tech Electrical Logo" className="h-12 w-auto leading-7" />
+            <img src="/logo.png" alt="High Tech Electrical Logo" className="h-12 w-auto leading-7" />
           </div>
           <div className="hidden md:flex items-center gap-6">
             <button
@@ -268,7 +268,7 @@ export default function HomePage() {
               safe, code-compliant installations and fast repairs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="text-slate-900 hover:bg-yellow-500 font-semibold text-lg bg-yellow-400">
+              <Button onClick={() => scrollToSection("contact")} size="lg" className="text-slate-900 hover:bg-yellow-500 font-semibold text-lg bg-yellow-400">
                 Request a Free Estimate
               </Button>
               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 bg-transparent">
