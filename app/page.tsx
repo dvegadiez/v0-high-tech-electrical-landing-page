@@ -143,7 +143,13 @@ export default function HomePage() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: contactForm.name, email: contactForm.email, message: contactForm.message }),
+        body: JSON.stringify({
+          name: contactForm.name,
+          email: contactForm.email,
+          phone: contactForm.phone,
+          serviceType: contactForm.serviceType,
+          message: contactForm.message,
+        }),
       })
 
       if (res.ok) {

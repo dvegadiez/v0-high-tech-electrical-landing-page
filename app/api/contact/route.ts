@@ -4,7 +4,7 @@ import { Resend } from "resend";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, email, message } = body ?? {};
+      const { name, email, message, phone, serviceType } = body ?? {};
 
     if (!name || !email || !message) {
       return NextResponse.json({ error: "Missing required fields: name, email, message" }, { status: 400 });
@@ -24,13 +24,15 @@ export async function POST(req: Request) {
 
     const resend = new Resend(apiKey);
 
-    const text = `New web quote request\n\nName: ${name}\nEmail: ${email}\n\nMessage:\n${message}`;
+      const text = `New web quote request\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone ?? ''}\nService Type: ${serviceType ?? ''}\n\nMessage:\n${message}`;
 
     const html = `
       <div style="font-family:system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; color:#111">
         <h2>New web quote request</h2>
         <p><strong>Name:</strong> ${escapeHtml(name)}</p>
         <p><strong>Email:</strong> <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></p>
+          <p><strong>Phone:</strong> ${escapeHtml(phone ?? '')}</p>
+          <p><strong>Service Type:</strong> ${escapeHtml(serviceType ?? '')}</p>
         <hr />
         <p><strong>Message:</strong></p>
         <div style="white-space:pre-wrap; background:#f6f6f6; padding:12px; border-radius:6px">${escapeHtml(message)}</div>
