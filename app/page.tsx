@@ -17,6 +17,9 @@ export default function HomePage() {
     message: "",
   })
 
+  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
+  const [validationError, setValidationError] = useState<string | null>(null)
+
   const [isNavVisible, setIsNavVisible] = useState(true)
   const lastScrollY = useRef(0)
 
@@ -112,17 +115,49 @@ export default function HomePage() {
     },
   ]
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Form submitted:", contactForm)
-    alert("Thank you for contacting High Tech Electrical! We will get back to you shortly.")
-    setContactForm({
-      name: "",
-      email: "",
-      phone: "",
-      serviceType: "",
-      message: "",
-    })
+
+    // reset validation error
+    setValidationError(null)
+
+    // validation (client-side) - all fields required
+    if (!contactForm.name || !contactForm.email || !contactForm.message) {
+      setValidationError('Please fill in name, email and message.')
+      setStatus('error')
+      return
+    }
+
+    // basic email format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(contactForm.email)) {
+      setValidationError('Please enter a valid email address.')
+      setStatus('error')
+      return
+    }
+
+    setStatus('sending')
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: contactForm.name, email: contactForm.email, message: contactForm.message }),
+      })
+
+      if (res.ok) {
+        setStatus('success')
+        setContactForm({ name: '', email: '', phone: '', serviceType: '', message: '' })
+      } else {
+        const text = await res.text()
+        setValidationError(text || 'Server error while sending message')
+        setStatus('error')
+        console.error('Contact API error:', text)
+      }
+    } catch (err) {
+      setStatus('error')
+      console.error('Contact submit error:', err)
+    }
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -373,8 +408,17 @@ export default function HomePage() {
                   size="lg"
                   className="w-full bg-yellow-400 text-slate-900 hover:bg-yellow-500 font-semibold"
                 >
-                  Send Message
+                  {status === 'sending' ? 'Enviando...' : 'Send Message'}
                 </Button>
+                {status === 'success' && (
+                  <p className="text-green-400 mt-2">Mensaje enviado. Gracias — nos pondremos en contacto pronto.</p>
+                )}
+                {validationError && (
+                  <p className="text-red-400 mt-2">{validationError}</p>
+                )}
+                {status === 'error' && !validationError && (
+                  <p className="text-red-400 mt-2">Error al enviar. Por favor intenta de nuevo más tarde.</p>
+                )}
               </form>
             </div>
           </div>
