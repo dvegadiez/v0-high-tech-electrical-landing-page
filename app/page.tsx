@@ -231,11 +231,28 @@ export default function HomePage() {
     }
   }, [status, validationError])
 
-  const scrollToSection = (sectionId: string) => {
+  const scrollToSection = async (sectionId: string) => {
     const element = document.getElementById(sectionId)
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" })
+    if (!element) return
+
+    // If on mobile and the menu is open, close it first so layout/height stabilizes
+    const isMobile = window.innerWidth < 768
+    if (isMobile && isMobileMenuOpen) {
+      setIsMobileMenuOpen(false)
+      // wait a couple of frames for the DOM/layout to update after closing the menu
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)))
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)))
     }
+
+    // Measure header/nav height and safe-area to compute precise scroll target
+    const navHeight = navRef.current ? navRef.current.getBoundingClientRect().height : 0
+    const rootStyles = getComputedStyle(document.documentElement)
+    const safeAreaVal = rootStyles.getPropertyValue('--safe-area-inset-top') || '0px'
+    const safeArea = parseFloat(safeAreaVal) || 0
+    const viewportOffset = (window.visualViewport && typeof window.visualViewport.offsetTop === 'number') ? window.visualViewport.offsetTop : 0
+
+    const top = element.getBoundingClientRect().top + window.scrollY - navHeight - safeArea - viewportOffset
+    window.scrollTo({ top: Math.max(0, Math.round(top)), behavior: 'smooth' })
   }
 
   return (
