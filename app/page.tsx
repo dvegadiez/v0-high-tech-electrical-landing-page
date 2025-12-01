@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
+import { WhatsAppButton } from "@/components/whatsapp-button"
 
 export default function HomePage() {
   const [contactForm, setContactForm] = useState({
@@ -470,6 +471,9 @@ export default function HomePage() {
           <p className="mt-2">Licensed & Insured</p>
         </div>
       </footer>
+
+      {/* WhatsApp Floating Button */}
+      <WhatsAppButton />
     </div>
   )
 }
