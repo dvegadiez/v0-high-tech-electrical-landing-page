@@ -21,11 +21,19 @@ export default function HomePage() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
   const [validationError, setValidationError] = useState<string | null>(null)
   const timerRef = useRef<number | null>(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const [isNavVisible, setIsNavVisible] = useState(true)
   const lastScrollY = useRef(0)
+  const navRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
+    // Disable scroll-based navbar hiding when mobile menu is open
+    if (isMobileMenuOpen) {
+      setIsNavVisible(true)
+      return
+    }
+
     const handleScroll = () => {
       const currentScrollY = window.scrollY
 
@@ -47,7 +55,24 @@ export default function HomePage() {
     return () => {
       window.removeEventListener("scroll", handleScroll)
     }
-  }, [])
+  }, [isMobileMenuOpen])
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        setIsMobileMenuOpen(false)
+      }
+    }
+
+    if (isMobileMenuOpen) {
+      document.addEventListener("click", handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside)
+    }
+  }, [isMobileMenuOpen])
 
   const services = [
     {
@@ -216,14 +241,17 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       <nav
-        className={`bg-white border-b border-slate-200 py-4 px-4 sticky top-0 z-50 shadow-sm transition-transform duration-300 ${
+        ref={navRef}
+        className={`bg-white border-b border-slate-200 py-4 px-4 sticky top-0 z-40 shadow-sm transition-transform duration-300 ${
           isNavVisible ? "translate-y-0" : "-translate-y-full"
         }`}
       >
-        <div className="max-w-6xl mx-auto flex items-center justify-between leading-7">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="High Tech Electrical Logo" className="h-12 w-auto leading-7" />
+            <img src="/logo.png" alt="High Tech Electrical Logo" className="h-12 w-auto" />
           </div>
+          
+          {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-6">
             <button
               onClick={() => scrollToSection("services")}
@@ -256,7 +284,84 @@ export default function HomePage() {
               Contact
             </button>
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle navigation menu"
+            aria-expanded={isMobileMenuOpen}
+            className="md:hidden flex flex-col gap-1.5 p-2"
+          >
+            <span
+              className={`block w-6 h-0.5 bg-slate-700 transition-all duration-300 ${
+                isMobileMenuOpen ? "rotate-45 translate-y-2" : ""
+              }`}
+            />
+            <span
+              className={`block w-6 h-0.5 bg-slate-700 transition-all duration-300 ${
+                isMobileMenuOpen ? "opacity-0" : ""
+              }`}
+            />
+            <span
+              className={`block w-6 h-0.5 bg-slate-700 transition-all duration-300 ${
+                isMobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
+              }`}
+            />
+          </button>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden mt-4 pb-4 border-t border-slate-200">
+            <div className="flex flex-col gap-3 pt-4">
+              <button
+                onClick={() => {
+                  scrollToSection("services")
+                  setIsMobileMenuOpen(false)
+                }}
+                className="text-slate-700 hover:text-yellow-600 font-medium transition-colors text-left py-2 px-2"
+              >
+                Services
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("benefits")
+                  setIsMobileMenuOpen(false)
+                }}
+                className="text-slate-700 hover:text-yellow-600 font-medium transition-colors text-left py-2 px-2"
+              >
+                Benefits
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("projects")
+                  setIsMobileMenuOpen(false)
+                }}
+                className="text-slate-700 hover:text-yellow-600 font-medium transition-colors text-left py-2 px-2"
+              >
+                Projects
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("testimonials")
+                  setIsMobileMenuOpen(false)
+                }}
+                className="text-slate-700 hover:text-yellow-600 font-medium transition-colors text-left py-2 px-2"
+              >
+                Testimonials
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("contact")
+                  setIsMobileMenuOpen(false)
+                }}
+                className="text-slate-900 px-4 py-2 rounded-md hover:bg-yellow-500 font-semibold transition-colors bg-yellow-400 w-full"
+              >
+                Contact
+              </button>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
